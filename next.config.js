@@ -1,6 +1,13 @@
 const nextConfig = {
   images: {
-    domains: ["mybvkgmretxxujcdabrh.supabase.co"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'mybvkgmretxxujcdabrh.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 }
 

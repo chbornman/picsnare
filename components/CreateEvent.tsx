@@ -1,55 +1,58 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
-import { useState } from "react"
-import { supabase } from "@/utils/supabase"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { useToast } from "@/components/ui/use-toast"
-
-interface CreateEventProps {
-  onEventCreated: (event: { id: string; title: string }) => void
-}
-
-export function CreateEvent({ onEventCreated }: CreateEventProps) {
-  const [title, setTitle] = useState("")
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+export function CreateEvent() {
+  const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      console.log("Attempting to create event with title:", title)
+      console.log("Attempting to create event with title:", title);
 
-      const { data, error } = await supabase.from("events").insert([{ title }]).select().single()
+      const { data, error } = await supabase
+        .from("events")
+        .insert([{ title }])
+        .select()
+        .single();
 
       if (error) {
-        throw error
+        throw error;
       }
 
       if (data) {
-        console.log("Event created successfully:", data)
-        onEventCreated({ id: data.id, title: data.title })
+        console.log("Event created successfully:", data);
         toast({
           title: "Success",
           description: "Event created successfully!",
-        })
+        });
+
+        // Navigate directly to the event page
+        router.push(`/event/${data.id}`);
       }
     } catch (error) {
-      console.error("Error creating event:", error)
+      console.error("Error creating event:", error);
       toast({
         title: "Error",
         description: `Failed to create event: ${error instanceof Error ? error.message : "Unknown error"}`,
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -74,6 +77,5 @@ export function CreateEvent({ onEventCreated }: CreateEventProps) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
-
