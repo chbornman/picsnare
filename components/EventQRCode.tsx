@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react"
 import QRCode from "qrcode"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function EventQRCode({ eventId }: { eventId: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -15,15 +14,6 @@ export default function EventQRCode({ eventId }: { eventId: string }) {
     }
   }, [eventId])
 
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-xl">Event QR Code</CardTitle>
-      </CardHeader>
-      <CardContent className="flex justify-center">
-        <canvas ref={canvasRef} />
-      </CardContent>
-    </Card>
-  )
+  return <canvas ref={canvasRef} />
 }
 

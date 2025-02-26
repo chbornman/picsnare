@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { supabase } from "@/utils/supabase"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
@@ -11,11 +11,17 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 export function Auth() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
+  const supabase = createClientComponentClient()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
     if (error) {
       alert(error.message)
     } else {
