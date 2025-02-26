@@ -18,7 +18,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.476.0",
-    "next": "14.2.16",
+    "next": "^14.2.16",
     "qrcode": "^1.5.4",
     "react": "^18",
     "react-dom": "^18",
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
