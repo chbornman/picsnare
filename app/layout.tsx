@@ -1,6 +1,8 @@
 import type React from "react"
 import "./globals.css"
 import { Inter } from "next/font/google"
+import { ThemeProvider } from "@/components/theme-provider"
+import { NavBar } from "@/components/NavBar"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -15,15 +17,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-white text-black`}>
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
-          <header className="w-full max-w-3xl text-center mb-8">
-            <h1 className="text-4xl font-bold">PicSnare</h1>
-            <p className="text-xl mt-2">Capture and share event moments</p>
-          </header>
-          <main className="w-full max-w-3xl">{children}</main>
-        </div>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} bg-background text-foreground min-h-screen`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="flex flex-col min-h-screen">
+            <NavBar />
+            <div className="flex-1 flex flex-col items-center p-4 pt-6">
+              <main className="w-full max-w-4xl">{children}</main>
+            </div>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   )

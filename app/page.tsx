@@ -6,7 +6,6 @@ import { supabase } from "@/utils/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2 } from "lucide-react";
 
 interface Event {
   id: string;
@@ -44,37 +43,18 @@ export default function Home() {
     fetchEvents();
   }, [toast]);
 
-  const handleDelete = async (e: React.MouseEvent, eventId: string) => {
-    e.preventDefault();
-    try {
-      const { error } = await supabase
-        .from("events")
-        .delete()
-        .eq("id", eventId);
-
-      if (error) throw error;
-
-      setEvents(events.filter(event => event.id !== eventId));
-      toast({
-        title: "Success",
-        description: "Event deleted successfully",
-      });
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete event. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (!supabaseInitialized) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-8">
+    <div className="w-full space-y-8">
+      <header className="w-full text-center mb-8">
+        <h1 className="text-4xl font-bold">PicSnare</h1>
+        <p className="text-xl mt-2">Capture and share event moments</p>
+      </header>
+    
       <div className="w-full max-w-md mx-auto">
         <CreateEvent />
       </div>
@@ -83,24 +63,18 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-4">Recent Events</h2>
         <div className="grid gap-4">
           {events.length === 0 ? (
-            <p className="text-center text-gray-500">No events created yet</p>
+            <p className="text-center text-muted-foreground">No events created yet</p>
           ) : (
             events.map((event) => (
-              <Link href={`/event/${event.id}`} key={event.id}>
-                <Card className="hover:bg-gray-50 transition-colors cursor-pointer">
+              <Link href={`/event/${event.id}`} key={event.id} className="block group">
+                <Card className="hover:bg-accent/40 dark:hover:bg-accent/20 transition-all cursor-pointer border-2 border-transparent hover:border-primary/10 hover:shadow-md">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle>{event.title}</CardTitle>
-                      <p className="text-sm text-gray-500">
+                      <CardTitle className="group-hover:text-primary transition-colors">{event.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
                         {new Date(event.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <button
-                      onClick={(e) => handleDelete(e, event.id)}
-                      className="p-2 hover:bg-gray-100 rounded-full"
-                    >
-                      <Trash2 className="h-5 w-5 text-gray-500 hover:text-red-500" />
-                    </button>
                   </CardHeader>
                 </Card>
               </Link>
