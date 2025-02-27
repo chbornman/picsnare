@@ -37,7 +37,6 @@ const breakpointColumnsObj = {
 const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: string }>(
   function EventGallery({ eventId, id }, ref) {
     const [photos, setPhotos] = useState<ImageItem[]>([])
-    const [selectedPhoto, setSelectedPhoto] = useState<ImageItem | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [showLoadingIndicator, setShowLoadingIndicator] = useState(false)
     const componentRef = useRef<HTMLElement>(null)
@@ -208,8 +207,7 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
         slides={lightboxSlides}
         index={lightboxState.index}
         on={{
-          view: ({ index }) => handleSlideChange(index),
-          change: ({ index }) => handleSlideChange(index)
+          view: ({ index }) => handleSlideChange(index)
         }}
         plugins={[Fullscreen, Slideshow, Thumbnails, Zoom, Counter, Captions, Download]}
         carousel={{
@@ -218,8 +216,8 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
           imageFit: "contain",
         }}
         render={{
-          buttonPrev: slides => slides.length > 1 ? undefined : () => null,
-          buttonNext: slides => slides.length > 1 ? undefined : () => null,
+          iconSlideshowPlay: () => null,
+          iconSlideshowPause: () => null
         }}
         controller={{
           touchAction: "pan-y",
@@ -243,10 +241,6 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
           descriptionTextAlign: "center",
         }}
         animation={{ swipe: 250 }}
-        render={{ 
-          iconSlideshowPlay: () => null,
-          iconSlideshowPause: () => null,
-        }}
         counter={{
           container: { style: { top: '12px', left: '12px', fontSize: '14px' } }
         }}
