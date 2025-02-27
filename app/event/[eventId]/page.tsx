@@ -51,7 +51,7 @@ export default function EventPage() {
     // You could add a toast notification here
   };
 
-  const handleUploadSuccess = async (newPhotoUrls: string[]) => {
+  const handleUploadSuccess = async () => {
     // Use the ref to call refreshPhotos method
     if (galleryRef.current) {
       galleryRef.current.refreshPhotos();

@@ -115,7 +115,7 @@ export default function EventUploader({
       reader.readAsDataURL(file);
       
       reader.onload = (event) => {
-        const img = new Image();
+        const img = document.createElement('img') as HTMLImageElement;
         img.src = event.target?.result as string;
         
         img.onload = () => {
@@ -191,18 +191,16 @@ export default function EventUploader({
         }
       }
 
+      // Upload the file without progress tracking
       const { error: uploadError } = await supabase.storage
         .from("event-photos")
-        .upload(filePath, fileToUpload, {
-          onUploadProgress: (progress) => {
-            const percent = Math.round((progress.loaded / progress.total) * 100)
-            updatedFileInfo = { ...updatedFileInfo, progress: percent }
-            // Update this file's progress
-            setUploadFiles(prev => 
-              prev.map(f => f.id === fileInfo.id ? updatedFileInfo : f)
-            )
-          }
-        })
+        .upload(filePath, fileToUpload)
+        
+      // Set progress to 100% when upload completes
+      updatedFileInfo = { ...updatedFileInfo, progress: 100 }
+      setUploadFiles(prev => 
+        prev.map(f => f.id === fileInfo.id ? updatedFileInfo : f)
+      )
 
       if (uploadError) throw uploadError
 
@@ -233,7 +231,7 @@ export default function EventUploader({
     if (pendingFiles.length === 0) return
 
     setUploading(true)
-    let completedFiles = []
+    const completedFiles: UploadFileInfo[] = []
 
     try {
       // Upload files in parallel but limit concurrency to 3

@@ -29,8 +29,6 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
     const [selectedPhoto, setSelectedPhoto] = useState<ImageItem | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [showLoadingIndicator, setShowLoadingIndicator] = useState(false)
-    // Track the fetch timestamp to force re-fetching of images
-    const [fetchTimestamp, setFetchTimestamp] = useState<number>(Date.now())
     const componentRef = useRef<HTMLElement>(null)
     const loadingTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -87,8 +85,6 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
         }
         setIsLoading(false)
         setShowLoadingIndicator(false)
-        // Update fetch timestamp to force image refresh
-        setFetchTimestamp(Date.now())
       }
     }, [eventId, isLoading])
 
@@ -100,7 +96,8 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
     // Expose the refreshPhotos method via DOM for legacy access
     useEffect(() => {
       if (componentRef.current) {
-        (componentRef.current as any).refreshPhotos = fetchPhotos
+        // Using type assertion with specific function type instead of any
+        (componentRef.current as unknown as { refreshPhotos: typeof fetchPhotos }).refreshPhotos = fetchPhotos
       }
     }, [fetchPhotos])
 

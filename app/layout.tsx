@@ -1,6 +1,7 @@
 import type React from "react"
 import "./globals.css"
 import { Inter } from "next/font/google"
+import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from "@/components/theme-provider"
 import { NavBar } from "@/components/NavBar"
 
@@ -31,6 +32,7 @@ export default function RootLayout({
               <main className="w-full max-w-4xl">{children}</main>
             </div>
           </div>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
