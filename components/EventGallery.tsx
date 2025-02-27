@@ -3,8 +3,19 @@
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from "react"
 import Image from "next/image"
 import Masonry from "react-masonry-css"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { supabase } from "@/utils/supabase"
+import Lightbox from "yet-another-react-lightbox"
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen"
+import Slideshow from "yet-another-react-lightbox/plugins/slideshow"
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"
+import Zoom from "yet-another-react-lightbox/plugins/zoom"
+import Counter from "yet-another-react-lightbox/plugins/counter"
+import Captions from "yet-another-react-lightbox/plugins/captions"
+import Download from "yet-another-react-lightbox/plugins/download"
+import "yet-another-react-lightbox/styles.css"
+import "yet-another-react-lightbox/plugins/thumbnails.css"
+import "yet-another-react-lightbox/plugins/counter.css"
+import "yet-another-react-lightbox/plugins/captions.css"
 
 interface ImageItem {
   src: string
@@ -114,9 +125,44 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
       fetchPhotos()
     }, [fetchPhotos])
 
-    const handleImageClick = (photo: ImageItem) => {
-      setSelectedPhoto(photo)
-    }
+    // State for the lightbox
+  const [lightboxState, setLightboxState] = useState({
+    open: false,
+    index: 0
+  });
+
+  const handleImageClick = (photoIndex: number) => {
+    // Update both values together in a single state update
+    setLightboxState({
+      open: true,
+      index: photoIndex
+    });
+  }
+  
+  const handleLightboxClose = () => {
+    setLightboxState(prev => ({
+      ...prev,
+      open: false
+    }));
+  }
+  
+  // Handle slide change within the lightbox
+  const handleSlideChange = (newIndex: number) => {
+    setLightboxState(prev => ({
+      ...prev,
+      index: newIndex
+    }));
+  }
+
+  // Convert our photos to the format expected by the lightbox
+  const lightboxSlides = photos.map((photo) => ({
+    src: photo.src,
+    alt: photo.alt,
+    width: 1920, // Provide dimensions to help the lightbox
+    height: 1080,
+    title: photo.alt,
+    description: new Date(photo.createdAt).toLocaleDateString(),
+  }));
 
   return (
     <section className="mt-4" ref={componentRef} id={id}>
@@ -132,43 +178,79 @@ const EventGallery = forwardRef<EventGalleryRefType, { eventId: string, id?: str
           className="my-masonry-grid"
           columnClassName="my-masonry-grid_column"
         >
-          {photos.map((photo) => (
+          {photos.map((photo, index) => (
             <div 
               key={photo.src} 
-              onClick={() => handleImageClick(photo)} 
-              className="cursor-pointer mb-4"
+              onClick={() => handleImageClick(index)} 
+              className="cursor-pointer mb-4 overflow-hidden rounded-md group"
             >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                width={500}
-                height={350}
-                className="rounded-md w-full h-auto object-cover transition-opacity duration-300"
-                placeholder="blur"
-                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+"
-                loading="lazy"
-              />
+              <div className="relative rounded-md overflow-hidden hover:shadow-lg transition-all duration-300">
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  width={500}
+                  height={350}
+                  className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+"
+                  loading="lazy"
+                />
+              </div>
             </div>
           ))}
         </Masonry>
       )}
 
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-3xl p-0">
-          {selectedPhoto && (
-            <Image
-              src={selectedPhoto.src || "/placeholder.svg"}
-              alt={selectedPhoto.alt}
-              width={1200}
-              height={800}
-              className="w-full h-auto object-contain max-h-[80vh]"
-              placeholder="blur"
-              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+"
-              priority={true}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Lightbox for fullscreen gallery */}
+      <Lightbox
+        open={lightboxState.open}
+        close={handleLightboxClose}
+        slides={lightboxSlides}
+        index={lightboxState.index}
+        on={{
+          view: ({ index }) => handleSlideChange(index),
+          change: ({ index }) => handleSlideChange(index)
+        }}
+        plugins={[Fullscreen, Slideshow, Thumbnails, Zoom, Counter, Captions, Download]}
+        carousel={{
+          finite: true,
+          preload: 3, // Preload 3 images ahead
+          imageFit: "contain",
+        }}
+        render={{
+          buttonPrev: slides => slides.length > 1 ? undefined : () => null,
+          buttonNext: slides => slides.length > 1 ? undefined : () => null,
+        }}
+        controller={{
+          touchAction: "pan-y",
+        }}
+        thumbnails={{
+          position: 'bottom',
+          width: 120,
+          height: 80,
+          gap: 16, 
+          border: 0,
+          borderRadius: 4,
+          padding: 4,
+        }}
+        styles={{ 
+          container: { backgroundColor: "rgba(0, 0, 0, 0.9)" },
+          thumbnail: { opacity: 0.8 },
+          thumbnailsTrack: { padding: "12px 0" },
+        }}
+        captions={{
+          showToggle: true,
+          descriptionTextAlign: "center",
+        }}
+        animation={{ swipe: 250 }}
+        render={{ 
+          iconSlideshowPlay: () => null,
+          iconSlideshowPause: () => null,
+        }}
+        counter={{
+          container: { style: { top: '12px', left: '12px', fontSize: '14px' } }
+        }}
+      />
     </section>
   )
 })
